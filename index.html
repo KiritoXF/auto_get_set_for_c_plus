@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>C++ Get() Set() 生成器</title>
+    <link rel="stylesheet" type="text/css" href="http://unpkg.com/view-design/dist/styles/iview.css">
+    <script type="text/javascript" src="http://vuejs.org/js/vue.min.js"></script>
+    <script type="text/javascript" src="http://unpkg.com/view-design/dist/iview.min.js"></script>
+</head>
+<style>
+    [v-cloak] {
+        display: none;
+    }
+
+    .main-body {
+        margin: 50px 280px;
+    }
+
+    div {
+        margin: 10px 0;
+    }
+</style>
+
+<body>
+    <div id="app" class="main-body" v-cloak>
+        <div>
+            <h1>C++ Get() Set() 生成器</h1>
+        </div>
+        <div>
+            <h3>原始数据</h3>
+            <i-input v-model="origin" type="textarea" :autosize="true" :rows="4" :placeholder="originHint" />
+        </div>
+        <div>
+            <h3>Class名(可选)</h3>
+            <i-input v-model="className" placeholder="请输入类名(可选)" style="width: 200px;" />
+        </div>
+        <i-button @click=generateButtonClick()>生成</i-button>
+        <div>
+            <h3>生成的数据 - 用于 .h 头文件</h3>
+            <i-input id="h" v-model="funDefinition" type="textarea" :autosize="true" :rows="4" placeholder="生成后的get set" />
+        </div>
+        <div>
+            <h3>生成的数据 - 用于 .cpp 源文件</h3>
+            <i-input id="cpp" v-model="funAchieve" type="textarea" :autosize="true" :rows="4" placeholder="生成后的get set实现" />
+        </div>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                origin: '',
+                originHint: '请输入变量定义，不要有多余的空行，不要漏掉分号。\n例如: \nint name;\nbool flag;',
+                funDefinition: '',
+                funAchieve: '',
+                className: '',
+            },
+            methods: {
+                generateButtonClick() {
+                    this.funDefinition = '';
+                    this.funAchieve = '';
+                    this.generateFunDef();
+                    this.generateFunAchieve();
+                },
+                // 生成函数的定义
+                // 例如 int GetXXX() 和 void SetXXX(int XXX)
+                generateFunDef() {
+                    const variables = this.origin.split('\n');
+
+                    variables.forEach(variable => {
+                        const arr = variable.trim().split(' ');
+                        const varType = arr[0];
+                        const varName = arr[1].slice(0, arr[1].length - 1);
+                        const transName = varName[0].toUpperCase() + varName.slice(1, varName.length);
+
+                        const str1 = varType + ' Get' + transName + '();';
+                        const str2 = 'void' + ' Set' + transName + '(' + varType + ' ' + varName + ');'
+                        this.funDefinition += str1 + '\n' + str2 + '\n';
+                    });
+                },
+                // 生成函数的实现
+                generateFunAchieve() {
+                    const variables = this.origin.split('\n');
+                    const that = this;
+                    
+                    variables.forEach(variable => {
+                        const arr = variable.trim().split(' ');
+                        const varType = arr[0];
+                        const varName = arr[1].slice(0, arr[1].length - 1);
+                        const transName = varName[0].toUpperCase() + varName.slice(1, varName.length);
+
+                        const str1 = 'void ' + that.className + '::Set' + transName + '(' + varType + ' ' + varName + ') \n{\n'
+                        + '    this->' + varName + ' = ' + varName + ';\n}';
+                        const str2 = varType + ' ' + that.className + '::Get' + transName + '()\n{\n'
+                        + '    return this->' + varName + ';\n}';
+
+                        this.funAchieve += str1 + '\n' + str2 + '\n' + '\n';
+                    });
+                },
+                copyCode() {
+                    const dom = document.getElementsByClassName('temp');
+                    document.getElementById('name').selec
+                    document.execCommand("Copy"); 
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>
